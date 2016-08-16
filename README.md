@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/motion/hoverglow/master/demo.gif" />
+
 ## hoverglow
 
 Make glows that hover.
@@ -5,7 +7,6 @@ Make glows that hover.
 ```
 npm install --save hoverglow
 ```
-<img src="https://raw.githubusercontent.com/motion/hoverglow/master/demo.gif" width="240" height="155" />
 
 #### Props
 
