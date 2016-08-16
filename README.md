@@ -1,6 +1,6 @@
-<img src="https://raw.githubusercontent.com/motion/hoverglow/master/demo.gif" />
-
 ## hoverglow
+
+<img src="https://raw.githubusercontent.com/motion/hoverglow/master/demo.gif" />
 
 Make glows that hover.
 
