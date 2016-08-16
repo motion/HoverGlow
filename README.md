@@ -2,7 +2,11 @@
 
 Make glows that hover.
 
-### Props
+```
+npm install --save hoverglow
+```
+
+#### Props
 
 ```js
 static defaultProps = {
@@ -25,7 +29,7 @@ static defaultProps = {
 }
 ```
 
-### Usage
+#### Usage
 
 ```js
 class {
