@@ -5,6 +5,7 @@ Make glows that hover.
 ```
 npm install --save hoverglow
 ```
+![demo video](https://raw.githubusercontent.com/motion/hoverglow/master/demo.gif)
 
 #### Props
 
