@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "color-js": "^1.0.3",
+    "element-resize-detector": "^1.1.10",
     "lodash.throttle": "^4.1.1",
     "react": "^15.3.0"
   }
