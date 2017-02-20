@@ -4,9 +4,13 @@ import $ from 'color-js'
 import resizer from 'element-resize-detector'
 import { addEvent, setTimeout } from 'motion-class-helpers'
 import { offset } from './helpers'
+import gloss from 'gloss'
+
+const style = gloss()
 
 const Resize = resizer({ strategy: 'scroll' })
 
+@style
 class HoverGlow extends React.Component {
   static defaultProps = {
     width: 380,
@@ -214,7 +218,6 @@ class HoverGlow extends React.Component {
       bottom: 0,
       zIndex: -1,
       // transition: 'opacity ease-in 20ms',
-
       '&:active': {
         pointerEvents: 'none',
       },

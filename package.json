@@ -4,20 +4,18 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "compile": "babel --presets es2015-sane,stage-0,react src --out-dir lib",
+    "compile": "babel --presets steelbrain --plugins gloss/transform src --out-dir lib",
     "prepublish": "npm run compile"
   },
   "author": "Nate Wienert",
   "license": "MIT",
   "devDependencies": {
-    "babel-preset-es2015-sane": "^6.6.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "babel-preset-flow": "^1.0.0",
-    "babel-preset-react": "^6.11.1"
+    "babel-preset-steelbrain": "^5.0.0"
   },
   "dependencies": {
     "color-js": "^1.0.3",
     "element-resize-detector": "^1.1.10",
+    "gloss": "^5.0.6",
     "lodash.throttle": "^4.1.1",
     "motion-class-helpers": "^1.0.0",
     "react": "^15.3.0"
