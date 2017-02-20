@@ -12,7 +12,7 @@ npm install --save hoverglow
 
 ```js
 static defaultProps = {
-  width: 300,
+  width: 380,
   height: 200,
   color: [0,0,0],
   zIndex: 100,
@@ -27,7 +27,7 @@ static defaultProps = {
   clickable: false,
   clickDuration: 150,
   clickScale: 2,
-  fadeTime: 100,
+  transition: 1000,
 }
 ```
 
