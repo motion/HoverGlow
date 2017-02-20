@@ -2,11 +2,12 @@ import React from 'react'
 import throttle from 'lodash.throttle'
 import $ from 'color-js'
 import resizer from 'element-resize-detector'
+import { addEvent, setTimeout } from 'motion-class-helpers'
 import { offset } from './helpers'
 
 const Resize = resizer({ strategy: 'scroll' })
 
-export default class HoverGlow extends React.Component {
+class HoverGlow extends React.Component {
   static defaultProps = {
     width: 380,
     height: 200,
@@ -226,3 +227,8 @@ export default class HoverGlow extends React.Component {
     },
   }
 }
+
+HoverGlow.prototype.setTimeout = setTimeout
+HoverGlow.prototype.addEvent = addEvent
+
+export default HoverGlow
