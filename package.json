@@ -17,7 +17,7 @@
     "element-resize-detector": "^1.1.10",
     "gloss": "^5.0.6",
     "lodash.throttle": "^4.1.1",
-    "motion-class-helpers": "^1.0.0",
+    "motion-class-helpers": "^1.0.5",
     "react": "^15.3.0"
   }
 }
