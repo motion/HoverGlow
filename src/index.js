@@ -1,10 +1,14 @@
 import React from 'react'
-import color from 'color-js'
 import throttle from 'lodash.throttle'
+import $ from 'color-js'
+import resizer from 'element-resize-detector'
+import { offset } from './helpers'
+
+const Resize = resizer({ strategy: 'scroll' })
 
 export default class HoverGlow extends React.Component {
   static defaultProps = {
-    width: 300,
+    width: 380,
     height: 200,
     color: [0,0,0],
     zIndex: 100,
@@ -19,7 +23,7 @@ export default class HoverGlow extends React.Component {
     clickable: false,
     clickDuration: 150,
     clickScale: 2,
-    fadeTime: 100,
+    transition: 1000,
   }
 
   state = {
@@ -27,53 +31,76 @@ export default class HoverGlow extends React.Component {
     position: {},
   }
 
-  center = {}
   bounds = {}
 
   componentDidMount() {
-    setTimeout(() => this.follow())
+    this.setTimeout(this.follow)
   }
 
   follow = () => {
-    if (this.root) {
-      const target = this.root.parentNode
-      this.bounds = target.getBoundingClientRect()
-      this.center = {
-        x: this.bounds.left + this.bounds.width / 2,
-        y: this.bounds.top + this.bounds.height / 2,
-      }
-      this.addEvent(target, 'mousemove', this.move)
-      this.addEvent(target, 'mouseenter', this.trackMouse(true))
-      this.addEvent(target, 'mouseleave', this.trackMouse(false))
+    let node
+
+    if (this.props.parent) {
+      node = this.props.parent()
+    }
+    else if (this.refs.root) {
+      node = this.refs.root.parentNode
+    }
+
+    if (node) {
+      this.node = node
+      this.setBounds()
+      this.addEvent(node, 'mouseenter', this.trackMouse(true))
+      this.addEvent(node, 'mousemove', this.move)
+      this.addEvent(node, 'mouseleave', this.trackMouse(false))
+      Resize.listenTo(node, this.setBounds)
 
       if (this.props.clickable) {
-        this.addEvent(target, 'click', this.click)
+        this.addEvent(node, 'click', this.click)
       }
     }
   }
 
-  move = throttle(({ clientX: x, clientY: y }) => {
+  componentWillUnmount() {
+    this.unmounted = true
+    if (this.node) {
+      Resize.removeAllListeners(this.node)
+    }
+  }
+
+  setBounds = throttle(() => {
+    this.bounds = this.node.getBoundingClientRect()
+  }, 100)
+
+  // offset gives us offset without scroll, just based on parent
+  move = throttle(e => {
+    const [x, y] = offset(e, this.node)
+    if (this.unmounted) return
     this.setState({
       position: {
-        x: x - this.center.x,
-        y: y - this.center.y,
+        x: x - this.bounds.width / 2,
+        y: y - this.bounds.height / 2,
       },
     })
-  }, 16)
+  }, 32)
 
   click = () => {
     this.setState({ clicked: true }, () => {
-      setTimeout(() => this.setState({ clicked: false }), this.props.clickDuration)
+      this.setTimeout(() => {
+        this.setState({ clicked: false })
+      }, this.props.clickDuration)
     })
   }
 
   trackMouse = track => () => {
-    setTimeout(() => {
-      this.setState({ track })
-    })
+    this.setState({ track })
   }
 
   render() {
+    if (!this.state.track) {
+      return <overlay ref="root" style={{ opacity: 0 }} />
+    }
+
     const {
       boundPct,
       full,
@@ -92,14 +119,10 @@ export default class HoverGlow extends React.Component {
       size,
       clickDuration,
       clickScale,
-      fadeTime,
-      ...props,
+      transition,
+      parent,
+      itemProps,
     } = this.props
-    const {
-      position: { x, y },
-      track,
-      clicked,
-    } = this.state
 
     // find width / height (full == match size of container)
     let width = size || propWidth
@@ -109,9 +132,13 @@ export default class HoverGlow extends React.Component {
       height = this.bounds.height
     }
 
-    const shadowAmt = shadowSize === null ? (width + height / 20) : shadowSize
-    const inversed = (coord) => !inverse? coord : -coord
-    const color$ = color(color)
+    const shadowAmt = shadowSize === null ? (width + height / 10) : shadowSize
+
+    const {
+      position: { x, y },
+      track,
+      clicked,
+    } = this.state
 
     // resists being moved (towards center)
     const resisted = (coord) => {
@@ -130,55 +157,72 @@ export default class HoverGlow extends React.Component {
       return Math.min(max, cur) * direction
     }
 
+    const inversed = (coord) => {
+      if (!inverse) return coord
+      return -coord
+    }
+
+    const colorRGB = $(color)
+
     return (
-      <glowcontainer
-        ref={_ => { this.root = _ }}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-        {...props}
-      >
-        {this.root &&
-          <glow
+      <overlay ref="root" {...itemProps}>
+        <glow
+          style={{
+            opacity: 1,
+            transform: `
+              translateX(${inversed(bounded(resisted(x), width * scale, this.bounds.width))}px)
+              translateY(${inversed(bounded(resisted(y), height * scale, this.bounds.height))}px)
+            `,
+          }}
+        >
+          <svg
+            height={height}
+            width={width}
             style={{
-              transform: `
-                translateX(${inversed(bounded(resisted(x), width * scale, this.bounds.width))}px)
-                translateY(${inversed(bounded(resisted(y), height * scale, this.bounds.height))}px)
+              boxShadow: `${shadowOffsetLeft}px ${shadowOffsetTop}px ${shadowAmt}px ${colorRGB}`,
+              transform: `scale(${scale * (clicked ? clickScale : 1)})`,
+              opacity: track ? opacity : 0,
+              marginLeft: -width / 2,
+              marginTop: -height / 2,
+              zIndex,
+              borderRadius,
+              transition: `
+                transform linear ${clickDuration / 2}ms,
+                opacity linear ${transition}ms
               `,
-              pointerEvents: 'none',
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
             }}
           >
-            <svg
-              height={height}
-              width={width}
-              style={{
-                boxShadow: `${shadowOffsetLeft}px ${shadowOffsetTop}px ${shadowAmt}px ${color$}`,
-                transform: `scale(${scale * (clicked ? clickScale : 1)})`,
-                opacity: track ? opacity : 0,
-                marginLeft: -width / 2,
-                marginTop: -height / 2,
-                zIndex,
-                borderRadius,
-                transition: `transform linear ${clickDuration / 2}ms, opacity linear ${fadeTime}ms`,
-              }}
-            >
-              <defs>
-                <filter id="f1" x="0" y="0">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation={(width + height) / 6} />
-                </filter>
-              </defs>
-              <rect width={width} height={height} fill={color$} filter="url(#f1)" />
-            </svg>
-          </glow>
-        }
-      </glowcontainer>
+            <defs>
+              <filter id="f1" x="0" y="0">
+                <feGaussianBlur in="SourceGraphic" stdDeviation={(width + height) / 6} />
+              </filter>
+            </defs>
+            <rect width={width} height={height} fill={colorRGB} filter="url(#f1)" />
+          </svg>
+        </glow>
+      </overlay>
     )
+  }
+
+  static style = {
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: -1,
+      // transition: 'opacity ease-in 20ms',
+
+      '&:active': {
+        pointerEvents: 'none',
+      },
+    },
+    glow: {
+      pointerEvents: 'none',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+    },
   }
 }
