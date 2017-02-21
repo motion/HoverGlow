@@ -162,6 +162,15 @@ class HoverGlow extends React.Component {
       return Math.min(max, cur) * direction
     }
 
+    const glowOpacity = (coordX, coordY, width, height) => {
+      const maxX = width / 10
+      const maxY = height / 10
+      const diffX = maxX - Math.abs(coordX)
+      const diffY = maxY - Math.abs(coordY)
+      const diff = Math.min(diffX, diffY)
+      return diff / 10
+    }
+
     const inversed = (coord) => {
       if (!inverse) return coord
       return -coord
@@ -173,7 +182,7 @@ class HoverGlow extends React.Component {
       <overlay ref="root" {...itemProps}>
         <glow
           style={{
-            opacity: 1,
+            opacity: `${glowOpacity(resisted(x), resisted(y), width, height)}`,
             transform: `
               translateX(${inversed(bounded(resisted(x), width * scale, this.bounds.width))}px)
               translateY(${inversed(bounded(resisted(y), height * scale, this.bounds.height))}px)
