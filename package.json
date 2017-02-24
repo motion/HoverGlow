@@ -4,7 +4,8 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "compile": "babel --presets steelbrain --plugins gloss/transform src --out-dir lib",
+    "build": "babel src --out-dir lib",
+    "watch": "npm run build -- --watch",
     "prepublish": "npm run compile"
   },
   "author": "Nate Wienert",
